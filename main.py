@@ -29,17 +29,23 @@ HandTracker = HandTracker(show_video=False)
 # create a function called 'update'.
 # this will automatically get called by the engine every frame.
 
+flicked = False
 
 def update():
-    #physics.update(1 / 60)
-    #player.position = physics.th.pos
-    #player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
-
-    speed = HandTracker.process_frame()
-    r_x, r_y = HandTracker.get_hand_pos()
-    x, y, z = -(r_x * TOT_X - TOT_X//2), -(r_y * TOT_Y - TOT_Y//2 + 1), -10
-    wand.position = (x, y, z)
-    if speed: print(f"Speed of the flick: {speed}")
+    global flicked
+    
+    if flicked:
+        physics.update(1 / 60)
+        player.position = physics.th.pos
+        player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
+    else:
+        speed = HandTracker.process_frame()
+        r_x, r_y = HandTracker.get_hand_pos()
+        x, y, z = -(r_x * TOT_X - TOT_X//2), -(r_y * TOT_Y - TOT_Y//2 + 1), -10
+        wand.position = (x, y, z)
+        if speed:
+            print(f"Speed of the flick: {speed}")
+            flicked = True
 
 
 
