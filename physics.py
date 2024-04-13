@@ -3,6 +3,7 @@ import numpy as np
 
 th = TopHat()
 
+up = np.array([0, 1, 0])
 g = 9.8
 
 
@@ -16,14 +17,14 @@ def update(dt):
     omega = inertia_loc @ th.ang_mom
 
     # forces
-    F = np.array([0, 0, -g]) * th.mass
-    Floc = th.pos
+    F = -g * up * th.mass
+    Floc = th.pos - np.array([0.01, 0, 0])
     Ftot += F
     Ttot += np.cross(Floc, F)
 
     # derivative
     Rd = np.cross(np.eye(3), omega * dt) @ th.rot
-
+    print(Rd)
     # update
     th.pos += v * dt
     th.rot += Rd + dt

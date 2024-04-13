@@ -1,4 +1,6 @@
 from ursina import *
+import physics
+from scipy.spatial.transform import Rotation as R
 
 # create a window
 app = Ursina()
@@ -13,15 +15,17 @@ app = Ursina()
 # 'scale_y=2' tells us how big the entity should be in the vertical axis, how tall it should be.
 # in ursina, positive x is right, positive y is up, and positive z is forward.
 
-player = Entity(model="cylinder", color=color.orange, scale_y=2)
+player = Entity(model="cube", color=color.orange, scale_y=2)
+box = Entity(model="cube", color=color.red, scale=(10, 0.5, 10), position=(0, -2, 0))
 
 # create a function called 'update'.
 # this will automatically get called by the engine every frame.
 
 
 def update():
-    player.x += held_keys["d"] * time.dt
-    player.x -= held_keys["a"] * time.dt
+    physics.update(1 / 60)
+    player.position = physics.th.pos
+    player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
 
 
 # this part will make the player move left or right based on our input.
@@ -33,8 +37,8 @@ def update():
 
 def input(key):
     if key == "space":
-        player.y += 1
-        invoke(setattr, player, "y", player.y - 1, delay=0.25)
+        physics.th.pos = Vec3(0, 0, 0)
+        physics.th.lin_mom = Vec3(0, 0, 0)
 
 
 # start running the game
