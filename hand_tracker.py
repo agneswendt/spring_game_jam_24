@@ -51,7 +51,7 @@ class HandTracker:
             x, y = lmList1[8][0:2]
             self.finger_pos.append((time.time(), (x, y)))
 
-            if y < SCREEN_Y // 2:
+            if y < 2 * SCREEN_Y // 3:
                 self.counter += 1
                 if self.counter >= self.data_points and self.reset is True:
                     self.reset = False
@@ -73,7 +73,6 @@ if __name__ == "__main__":
     hand_tracker = HandTracker(show_video=True)
     while True:
         speed = hand_tracker.process_frame()
-        print(hand_tracker.get_hand_pos())
         if speed:
             print(speed)
         cv2.waitKey(1)
