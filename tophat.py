@@ -1,4 +1,5 @@
 import numpy as np
+from circle import Circle
 
 
 class TopHat:
@@ -8,6 +9,10 @@ class TopHat:
         self.inertia_inv = np.linalg.inv(self.inertia)
         self.center = np.zeros(3)
         self.pos = np.zeros(3)
-        self.rot = np.zeros((3, 3))
+        self.rot = np.eye(3)
         self.lin_mom = np.zeros(3)
         self.ang_mom = np.zeros(3)
+
+        self.circles = []
+        self.circles.append(Circle(np.array([0, 2, 0]), 1.2))
+        self.circles.append(Circle(np.array([0, 0, 0]), 1.2))

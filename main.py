@@ -1,6 +1,7 @@
 from ursina import *
 import physics
 from scipy.spatial.transform import Rotation as R
+from ursina.models.procedural.cylinder import Cylinder
 
 # create a window
 app = Ursina()
@@ -15,7 +16,7 @@ app = Ursina()
 # 'scale_y=2' tells us how big the entity should be in the vertical axis, how tall it should be.
 # in ursina, positive x is right, positive y is up, and positive z is forward.
 
-player = Entity(model="cube", color=color.orange, scale_y=2)
+player = Entity(model=Cylinder(radius=1.2), color=color.orange, scale_y=2)
 box = Entity(model="cube", color=color.red, scale=(10, 0.5, 10), position=(0, -2, 0))
 
 # create a function called 'update'.
