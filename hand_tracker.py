@@ -18,7 +18,7 @@ class HandTracker:
         self.show_video = show_video
         self.data_points = data_points
         self.finger_pos = []  # (time, (x, y))
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(2)
         self.counter = 0
         self.reset = True
 
@@ -40,7 +40,6 @@ class HandTracker:
         Process the latest frame. Return the speed of the finger movement if a flick is completed,
         else return None.
         """
-        print("Processing frame")
         _, img = self.cap.read()
         hands, img = self.detector.findHands(img, draw=True, flipType=True)
 

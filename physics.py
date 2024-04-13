@@ -14,10 +14,21 @@ force_locs = []
 has_collided = False
 
 
-def update(dt):
+def give_impulse(strength, h, dt):
     global forces, force_locs
     forces = []
     force_locs = []
+    forces.append(strength * up / dt)
+    circ = th.circles[1]
+    loc = circ.pos.copy()
+    loc[0] += h * circ.radius
+    loc[2] += circ.radius
+    print("Flick at", h)
+    force_locs.append(loc)
+
+
+def update(dt):
+    global forces, force_locs
     collision(dt)
     Ftot = np.zeros(3)
     Ttot = np.zeros(3)
@@ -34,6 +45,8 @@ def update(dt):
     Ttot += np.cross(Floc, F) + sum(
         [np.cross(force_locs[i], forces[i]) for i in range(len(forces))]
     )
+    forces = []
+    force_locs = []
 
     # print(F, forces)
     # print(th.pos)
@@ -74,7 +87,9 @@ def collision(dt):
         p = pc + circle.radius * d
         points.append((p, p[1] < ground, pc))
     num_collisions = sum([p[1] for p in points])
-    if points:
+    if num_collisions > 0:
+        counter += 1
+        # print("collision", counter)
         mom = th.lin_mom[1]
         # fac = 1 - 1 / (1 + abs(mom))
         fac = 0.0
@@ -101,7 +116,7 @@ def collision(dt):
 
             # levelness = min(1, levelness * 10) ** 3
             ang_mom = np.linalg.norm(th.ang_mom)
-            print(ang_mom, levelness)
+            # print(ang_mom, levelness)
             if ang_mom < 1 and levelness < 0.01:
                 th.ang_mom = np.zeros(3)
 
@@ -137,4 +152,6 @@ def collision(dt):
             # forces.append(np.array([2, 0, 0]))
             force_locs.append(force_loc)
             break
+        max_dist = min(max_dist, 0.1)
         th.pos += max_dist * up  # - 1 * th.lin_mom / th.mass * dt
+        print(max_dist, th.pos, th.circles[0].pos, th.circles[1].pos)
