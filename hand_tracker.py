@@ -51,7 +51,7 @@ class HandTracker:
             x, y = lmList1[8][0:2]
             self.finger_pos.append((time.time(), (x, y)))
 
-            if y < 2 * SCREEN_Y // 3:
+            if y < SCREEN_Y // 2:
                 self.counter += 1
                 if self.counter >= self.data_points and self.reset is True:
                     self.reset = False
