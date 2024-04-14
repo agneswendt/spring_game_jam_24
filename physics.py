@@ -1,9 +1,10 @@
-from tophat import TopHat
 import numpy as np
+
+from tophat import TopHat
 
 th = TopHat()
 
-ground = -2
+ground = 0
 
 up = np.array([0, 1, 0])
 g = 9.8
