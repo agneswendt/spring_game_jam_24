@@ -21,17 +21,36 @@ from ursina.shaders import lit_with_shadows_shader
 import physics
 from hand_tracker import HandTracker
 from mouse_tracker import MouseTracker
+from screens import MainMenu
 from tophat import TopHat
 
-# create a window
+# constants
+GAME_STATES = ["MENU", "PLAYING"]
+USE_MOUSE = False
+
+# global variables
+current_game_state = GAME_STATES[0]
+flicked = False
+
 app = Ursina()
+
+if USE_MOUSE:
+    tracker = MouseTracker(app)
+else:
+    tracker = HandTracker(show_video=False)
+
+main_menu = None
+
+# create a window
 ed = EditorCamera()
+physics.th = TopHat(top_radius=1.4, bottom_radius=2, hat_height=2.6)
+physics.th.rot = R.from_euler("x", 0, degrees=True).as_matrix()
+
+# instantiate entities
 ed.y = 10
 ed.z = -50
 TOT_X, TOT_Y = 10, 8
 
-physics.th = TopHat(top_radius=1.4, bottom_radius=2, hat_height=2.6)
-USE_MOUSE = False
 
 miny = 0
 maxr = 0
@@ -45,10 +64,8 @@ for circle in physics.th.circles:
 
 # physics.th.pos[1] = -miny
 
-physics.th.rot = R.from_euler("x", 179, degrees=True).as_matrix()
-# physics.th.lin_mom = np.array([0.0, 0.0, -10.0])
+physics.th.rot = R.from_euler("x", 0, degrees=True).as_matrix()
 
-# player = Entity(model=Cylinder(radius=1.2, start=-0.5), color=color.orange, scale_y=2)
 # DirectionalLight()
 background = Entity(
     model="quad", scale=(100, 100 * 0.75), texture="background.png", z=12
@@ -88,12 +105,9 @@ bottom_circle = Entity(
     rotation_x=90,
     color=color.blue,
 )
-# box = Entity(
-#     model="cube",
-#     color=color.red,
-#     scale=(10, 0.5, 10),
-#     position=(0, -2.5, 0),
-# )
+# player.position = physics.th.pos
+player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
+
 table = Entity(
     model="quad", texture="table.png", scale=(30 * 0.41, 30), position=(0, 0, 3)
 )
@@ -118,20 +132,22 @@ wandtip2 = Entity(
 )
 wand.rotation = (45, 0, 0)
 
-if USE_MOUSE:
-    tracker = MouseTracker(app)
-else:
-    tracker = HandTracker(show_video=False)
 
-flicked = False
+def start_game():
+    global current_game_state, main_menu
+    current_game_state = "PLAYING"
+    print("Starting game main")
+    main_menu.visible = False
 
 
-player.position = physics.th.pos
-player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
+def add_menu_once():
+    global main_menu
+    if not main_menu:
+        main_menu = MainMenu(start_game)
+    else:
+        main_menu.visable = True
 
-xr = []
-yr = []
-zr = []
+
 ed.look_at(-ed.position + player.position)
 
 win_text = Text(
@@ -172,9 +188,6 @@ def update():
         lq = LQuaternionf(rot[0], rot[1], rot[2], rot[3])
         player.quaternion_setter(lq)
 
-        xr.append(rot[0])
-        yr.append(rot[1])
-        zr.append(rot[2])
         ed.look_at(-ed.position + player.position)
         if physics.is_in_win_state:
             print("You win!")
@@ -195,8 +208,42 @@ def update():
             physics.give_impulse(strength, hit_loc, 1 / 60)
 
 
+# update loop for the game
+def update():
+    global main_menu, current_game_state
+    if current_game_state == "MENU":
+        add_menu_once()
+    elif current_game_state == "PLAYING":
+        global flicked
+
+        if flicked:
+            physics.update(1 / 60)
+            player.position = physics.th.pos
+            rot = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
+            xf = player.rotation[0]
+            xn = rot[0]
+
+            diff = np.round(((xn - xf) / 180)) * 180
+            rot[0] = xn + diff
+
+            player.rotation = rot
+            ed.look_at(-ed.position + player.position)
+        else:
+            speed = tracker.process_frame()
+            x, y, r_x = tracker.get_wand_pos()
+            z = -10
+            wand.position = (x, y, z)
+            if speed:
+                flicked = True
+                play_audio(speed)
+                strength = speed * 1 / 60
+                h = r_x * 2 - 1
+                physics.give_impulse(strength, h, 1 / 60)
+
+
+# input loop for the game
 def input(key):
-    global flicked, xr, yr, zr, USE_MOUSE
+    global flicked, USE_MOUSE, main_menu, current_game_state
     if key == "space":
         physics.th.reset()
         physics.th.pos[1] = -miny
@@ -218,11 +265,12 @@ def input(key):
         else:
             tracker = HandTracker(show_video=False)
     if key == "escape":
-        plt.plot(xr, label="x")
-        plt.plot(yr, label="y")
-        plt.plot(zr, label="z")
-        plt.legend()
-        plt.show()
+        if current_game_state == "PLAYING":
+            current_game_state = "MENU"
+            main_menu.visible = True
+        else:
+            current_game_state = "PLAYING"
+            main_menu.visible = False
 
 
 # start running the game
