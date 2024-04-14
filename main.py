@@ -6,14 +6,14 @@ from ursina.models.procedural.cylinder import Circle, Cone, Cylinder
 
 import physics
 from hand_tracker import HandTracker
+from mouse_tracker import MouseTracker
 from tophat import TopHat
 
 # create a window
 app = Ursina()
 ed = EditorCamera()
-TOT_X, TOT_Y = 10, 8
-
-physics.th = TopHat(top_radius=1.4, bottom_radius=2, hat_height=2.6)
+USE_MOUSE = False
+physics.th = TopHat(top_radius=2.2, bottom_radius=2.2, hat_height=1.0)
 
 physics.th.rot = R.from_euler("x", 0, degrees=True).as_matrix()
 # physics.th.lin_mom = np.array([0.0, 0.0, -10.0])
@@ -51,9 +51,13 @@ box = Entity(model="cube", color=color.red, scale=(10, 0.5, 10), position=(0, -2
 wand = Entity(model=Cylinder(radius=0.1), color=color.blue, scale_y=2)
 wand.rotation = (45, 0, 0)
 
-HandTracker = HandTracker(show_video=False)
+if USE_MOUSE:
+    tracker = MouseTracker(app)
+else:
+    tracker = HandTracker(show_video=False)
 
 flicked = False
+
 
 player.position = physics.th.pos
 player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
@@ -81,10 +85,9 @@ def update():
         yr.append(rot[1])
         zr.append(rot[2])
     else:
-        speed = HandTracker.process_frame()
-        r_x, r_y = HandTracker.get_hand_pos()
-        r_x = r_x * 2
-        x, y, z = -(r_x * TOT_X - TOT_X // 2), -(r_y * TOT_Y - TOT_Y // 2 + 1), -10
+        speed = tracker.process_frame()
+        x, y, r_x = tracker.get_wand_pos()
+        z = -10
         wand.position = (x, y, z)
         if speed:
             print(f"Speed of the flick: {speed}")
