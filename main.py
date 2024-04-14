@@ -7,6 +7,7 @@ from ursina.shaders import lit_with_shadows_shader
 
 import physics
 from hand_tracker import HandTracker
+from mouse_tracker import MouseTracker
 from tophat import TopHat
 
 # create a window
@@ -19,6 +20,7 @@ ed.look_at(-ed.position + Vec3(0, 5, 0))
 TOT_X, TOT_Y = 10, 8
 
 physics.th = TopHat(top_radius=1.4, bottom_radius=2, hat_height=2.6)
+USE_MOUSE = False
 
 miny = 0
 for circle in physics.th.circles:
@@ -89,9 +91,13 @@ wand = Entity(
 )
 wand.rotation = (45, 0, 0)
 
-HandTracker = HandTracker(show_video=False)
+if USE_MOUSE:
+    tracker = MouseTracker(app)
+else:
+    tracker = HandTracker(show_video=False)
 
 flicked = False
+
 
 player.position = physics.th.pos
 player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
@@ -120,10 +126,9 @@ def update():
         zr.append(rot[2])
         ed.look_at(-ed.position + player.position)
     else:
-        speed = HandTracker.process_frame()
-        r_x, r_y = HandTracker.get_hand_pos()
-        r_x = r_x * 2
-        x, y, z = -(r_x * TOT_X - TOT_X // 2), -(r_y * TOT_Y - TOT_Y // 2 + 1), -10
+        speed = tracker.process_frame()
+        x, y, r_x = tracker.get_wand_pos()
+        z = -10
         wand.position = (x, y, z)
         if speed:
             print(f"Speed of the flick: {speed}")
@@ -135,7 +140,7 @@ def update():
 
 
 def input(key):
-    global flicked, xr, yr, zr
+    global flicked, xr, yr, zr, USE_MOUSE
     if key == "space":
         physics.th.reset()
         physics.th.pos[1] = -miny
@@ -145,6 +150,13 @@ def input(key):
         xr = []
         yr = []
         zr = []
+    if key == "m":
+        USE_MOUSE = not USE_MOUSE
+        global tracker
+        if USE_MOUSE:
+            tracker = MouseTracker(app)
+        else:
+            tracker = HandTracker(show_video=False)
     if key == "escape":
         plt.plot(xr, label="x")
         plt.plot(yr, label="y")

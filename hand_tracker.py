@@ -4,6 +4,7 @@ import time
 
 SCREEN_X = 1300
 SCREEN_Y = 800
+TOT_X, TOT_Y = 10, 8
 
 
 class HandTracker:
@@ -18,9 +19,20 @@ class HandTracker:
         self.show_video = show_video
         self.data_points = data_points
         self.finger_pos = []  # (time, (x, y))
-        self.cap = cv2.VideoCapture(2)
+        self.cap = self.get_video_object()
         self.counter = 0
         self.reset = True
+    
+    def get_video_object(self) -> cv2.VideoCapture:
+        """Tries to automatically find the camera and return the object.
+        """
+        for i in range(2):
+            obj = cv2.VideoCapture(i)
+            if obj is not None and obj.isOpened():
+                print(i)
+                return obj
+        else:
+            raise Exception("No camera found")
 
     def calc_speed(self, img) -> int:
         """Return the average speed of the latest data points."""
@@ -67,6 +79,12 @@ class HandTracker:
             return 0.5, 0.5
         x, y = self.finger_pos[-1][1]
         return x / SCREEN_X, y / SCREEN_Y
+
+    def get_wand_pos(self) -> tuple[int, int]:
+        r_x, r_y = self.get_hand_pos()
+        r_x = r_x * 2
+        x, y = -(r_x * TOT_X - TOT_X // 2), -(r_y * TOT_Y - TOT_Y // 2 + 1)
+        return x, y, r_x
 
 
 if __name__ == "__main__":
