@@ -210,7 +210,7 @@ def update():
 
 # input loop for the game
 def input(key):
-    global flicked, USE_MOUSE, main_menu
+    global flicked, USE_MOUSE, main_menu, current_game_state
     if key == "space":
         physics.th.reset()
         physics.th.pos[1] = -miny
@@ -226,7 +226,12 @@ def input(key):
         else:
             tracker = HandTracker(show_video=False)
     if key == "escape":
-        main_menu.visible = False
+        if current_game_state == "PLAYING":
+            current_game_state = "MENU"
+            main_menu.visible = True
+        else:
+            current_game_state = "PLAYING"
+            main_menu.visible = False
 
 
 # start running the game
