@@ -26,7 +26,7 @@ def give_impulse(strength, h, dt):
     loc = circ.pos.copy()
     loc[0] += h * circ.radius
     loc[2] += circ.radius
-    print("Flick at", h)
+    # print("Flick at", h)
     force_locs.append(loc)
 
 
@@ -50,9 +50,6 @@ def update(dt):
     )
     forces = []
     force_locs = []
-
-    # print(F, forces)
-    # print(th.pos)
 
     # derivative
     Rd = np.cross(np.eye(3), omega * dt) @ th.rot
