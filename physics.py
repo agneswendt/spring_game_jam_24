@@ -14,6 +14,8 @@ force_locs = []
 
 has_collided = False
 
+is_in_win_state = False
+
 
 def give_impulse(strength, h, dt):
     global forces, force_locs
@@ -76,6 +78,7 @@ counter = 0
 def collision(dt):
     global has_collided
     global counter
+    global is_in_win_state
     n = th.rot @ up
     l = np.cross(n, up)
     d = np.cross(n, l)
@@ -120,6 +123,12 @@ def collision(dt):
             # print(ang_mom, levelness)
             if ang_mom < 1 and levelness < 0.01:
                 th.ang_mom = np.zeros(3)
+                if levelness == levelness2:
+                    # Stands on one circle
+                    hat_up = th.rot @ up
+                    if np.dot(hat_up, up) < 0:
+                        # Hat upside down
+                        is_in_win_state = True
 
             force_loc = p - th.pos
             # force_loc[::2] *= levelness

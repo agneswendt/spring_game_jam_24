@@ -1,7 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-from ursina import DirectionalLight, EditorCamera, Entity, Sky, Ursina, Vec3, color
+from ursina import (
+    DirectionalLight,
+    EditorCamera,
+    Entity,
+    Sky,
+    Text,
+    Ursina,
+    Vec3,
+    color,
+)
 from ursina.models.procedural.cylinder import Circle, Cone, Cylinder
 from ursina.shaders import lit_with_shadows_shader
 
@@ -22,10 +31,14 @@ physics.th = TopHat(top_radius=1.4, bottom_radius=2, hat_height=2.6)
 USE_MOUSE = False
 
 miny = 0
+maxr = 0
 for circle in physics.th.circles:
     y = circle.pos[1]
     if y < miny:
         miny = y
+    r = circle.radius
+    if r > maxr:
+        maxr = r
 
 physics.th.pos[1] = -miny
 
@@ -85,8 +98,20 @@ table.rotation_x = 90
 table.rotation_y = 90
 wand = Entity(
     model=Cylinder(radius=0.1),
-    color=color.blue,
+    color=color.black,
     scale_y=2,
+)
+wandtip1 = Entity(
+    parent=wand,
+    model=Cylinder(radius=0.1, start=5),
+    color=color.white,
+    scale_y=0.2,
+)
+wandtip2 = Entity(
+    parent=wand,
+    model=Cylinder(radius=0.1, start=-1),
+    color=color.white,
+    scale_y=0.2,
 )
 wand.rotation = (45, 0, 0)
 
@@ -106,11 +131,21 @@ yr = []
 zr = []
 ed.look_at(-ed.position + player.position)
 
+win_text = Text(
+    "You win!",
+    enabled=False,
+    position=(0, 0),
+    scale=0.1,
+    background=True,
+    color=color.black,
+)
+
 
 def update():
     global flicked
 
-    if flicked:
+    if flicked and not physics.is_in_win_state:
+        wand.enabled = False
         physics.update(1 / 60)
         player.position = physics.th.pos
         rot = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
@@ -125,18 +160,23 @@ def update():
         yr.append(rot[1])
         zr.append(rot[2])
         ed.look_at(-ed.position + player.position)
+        if physics.is_in_win_state:
+            print("You win!")
+            physics.is_in_win_state = False
+            win_text.enabled = True
+            win = True
     else:
         speed = tracker.process_frame()
         x, y, r_x = tracker.get_wand_pos()
         z = -10
         wand.position = (x, y, z)
-        if speed:
+        hit_loc = x / maxr
+        if speed and abs(hit_loc) < 1:
             print(f"Speed of the flick: {speed}")
             print(physics.th.circles[1].pos)
             flicked = True
             strength = speed * 1 / 60
-            h = r_x * 2 - 1
-            physics.give_impulse(strength, h, 1 / 60)
+            physics.give_impulse(strength, hit_loc, 1 / 60)
 
 
 def input(key):
@@ -148,6 +188,9 @@ def input(key):
         player.position = physics.th.pos
         player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
         ed.look_at(-ed.position + player.position)
+        wand.enabled = True
+        physics.is_in_win_state = False
+        win_text.enabled = False
         xr = []
         yr = []
         zr = []
