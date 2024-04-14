@@ -5,6 +5,7 @@ import numpy as np
 from panda3d.core import LQuaternionf
 from scipy.spatial.transform import Rotation as R
 from ursina import (
+    Button,
     DirectionalLight,
     EditorCamera,
     Entity,
@@ -62,7 +63,7 @@ for circle in physics.th.circles:
     if r > maxr:
         maxr = r
 
-# physics.th.pos[1] = -miny
+physics.th.pos[1] = -miny
 
 physics.th.rot = R.from_euler("x", 0, degrees=True).as_matrix()
 

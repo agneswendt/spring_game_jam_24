@@ -8,16 +8,20 @@ class MainMenu(Entity):
         )
 
         self.start_button = Button(
+            parent=self,
             text="Start Game",
             color=color.black,
             scale=(0.2, 0.1),
             position=(-0.2, -0.2),
+            z=-0.01,
         )
         self.exit_button = Button(
+            parent=self,
             text="Exit Game",
             color=color.black,
             scale=(0.2, 0.1),
             position=(0.2, -0.2),
+            z=-0.01,
         )
 
         self.start_game_func = start_game_func
