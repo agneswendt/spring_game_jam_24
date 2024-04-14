@@ -15,7 +15,6 @@ app = Ursina()
 ed = EditorCamera()
 ed.y = 10
 ed.z = -50
-ed.look_at(-ed.position + Vec3(0, 5, 0))
 
 TOT_X, TOT_Y = 10, 8
 
@@ -105,6 +104,7 @@ player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
 xr = []
 yr = []
 zr = []
+ed.look_at(-ed.position + player.position)
 
 
 def update():
@@ -147,6 +147,7 @@ def input(key):
         flicked = False
         player.position = physics.th.pos
         player.rotation = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
+        ed.look_at(-ed.position + player.position)
         xr = []
         yr = []
         zr = []

@@ -1,6 +1,7 @@
-from cvzone.HandTrackingModule import HandDetector
-import cv2
 import time
+
+import cv2
+from cvzone.HandTrackingModule import HandDetector
 
 SCREEN_X = 1300
 SCREEN_Y = 800
@@ -20,12 +21,13 @@ class HandTracker:
         self.data_points = data_points
         self.finger_pos = []  # (time, (x, y))
         self.cap = self.get_video_object()
+        self.screen_x = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.screen_y = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.counter = 0
         self.reset = True
-    
+
     def get_video_object(self) -> cv2.VideoCapture:
-        """Tries to automatically find the camera and return the object.
-        """
+        """Tries to automatically find the camera and return the object."""
         for i in range(2):
             obj = cv2.VideoCapture(i)
             if obj is not None and obj.isOpened():
@@ -64,7 +66,7 @@ class HandTracker:
             x, y = lmList1[8][0:2]
             self.finger_pos.append((time.time(), (x, y)))
 
-            if y < SCREEN_Y // 2:
+            if y < self.screen_y // 2:
                 self.counter += 1
                 if self.counter >= self.data_points and self.reset is True:
                     self.reset = False
@@ -78,12 +80,14 @@ class HandTracker:
         if not self.finger_pos:
             return 0.5, 0.5
         x, y = self.finger_pos[-1][1]
-        return x / SCREEN_X, y / SCREEN_Y
+        return x / self.screen_x, y / self.screen_y
 
     def get_wand_pos(self) -> tuple[int, int]:
         r_x, r_y = self.get_hand_pos()
-        r_x = r_x * 2
-        x, y = -(r_x * TOT_X - TOT_X // 2), -(r_y * TOT_Y - TOT_Y // 2 + 1)
+        r_x = r_x * 2 - 1
+        r_y = r_y * 2 - 1
+        print(r_x, r_y)
+        x, y = -r_x * TOT_X / 2, -r_y * TOT_Y / 2
         return x, y, r_x
 
 
