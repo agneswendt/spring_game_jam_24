@@ -28,11 +28,12 @@ class HandTracker:
 
     def get_video_object(self) -> cv2.VideoCapture:
         """Tries to automatically find the camera and return the object."""
-        for i in range(2):
+        for i in (2, 1, 0):
             obj = cv2.VideoCapture(i)
             if obj is not None and obj.isOpened():
-                print(i)
                 return obj
+            else:
+                obj.release()
         else:
             raise Exception("No camera found")
 
@@ -86,7 +87,6 @@ class HandTracker:
         r_x, r_y = self.get_hand_pos()
         r_x = r_x * 2 - 1
         r_y = r_y * 2 - 1
-        print(r_x, r_y)
         x, y = -r_x * TOT_X / 2, -r_y * TOT_Y / 2
         return x, y, r_x
 

@@ -131,8 +131,6 @@ def update():
         z = -10
         wand.position = (x, y, z)
         if speed:
-            print(f"Speed of the flick: {speed}")
-            print(physics.th.circles[1].pos)
             flicked = True
             strength = speed * 1 / 60
             h = r_x * 2 - 1
