@@ -1,7 +1,7 @@
 from ursina import *
 import physics
 from scipy.spatial.transform import Rotation as R
-from ursina.models.procedural.cylinder import Cylinder
+from ursina.models.procedural.cylinder import Cylinder, Cone, Circle
 import numpy as np
 from hand_tracker import HandTracker
 from tophat import TopHat
@@ -9,13 +9,39 @@ import matplotlib.pyplot as plt
 
 # create a window
 app = Ursina()
-
+ed = EditorCamera()
 TOT_X, TOT_Y = 10, 8
 
-physics.th.rot = R.from_euler("x", -10, degrees=True).as_matrix()
+physics.th = TopHat(top_radius=2.2, bottom_radius=2.2, hat_height=1.0)
+
+physics.th.rot = R.from_euler("x", 0, degrees=True).as_matrix()
 # physics.th.lin_mom = np.array([0.0, 0.0, -10.0])
 
-player = Entity(model=Cylinder(radius=1.2, start=-0.5), color=color.orange, scale_y=2)
+# player = Entity(model=Cylinder(radius=1.2, start=-0.5), color=color.orange, scale_y=2)
+
+player = Entity(position=(physics.th.pos[0], physics.th.pos[1], physics.th.pos[2]))
+top_circle = Entity(
+    parent=player,
+    model=Circle(
+        resolution=16,
+        radius=physics.th.top_circle().radius,
+        mode="line",
+    ),
+    position=physics.th.top_circle().pos,
+    rotation_x=90,
+    color=color.green,
+)
+bottom_circle = Entity(
+    parent=player,
+    model=Circle(
+        resolution=16,
+        radius=physics.th.bottom_circle().radius,
+        mode="line",
+    ),
+    position=physics.th.bottom_circle().pos,
+    rotation_x=90,
+    color=color.blue,
+)
 box = Entity(model="cube", color=color.red, scale=(10, 0.5, 10), position=(0, -2.5, 0))
 wand = Entity(model=Cylinder(radius=0.1), color=color.blue, scale_y=2)
 wand.rotation = (45, 0, 0)
