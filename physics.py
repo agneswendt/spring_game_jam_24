@@ -123,9 +123,9 @@ def collision(dt):
                 if levelness == levelness2:
                     # Stands on one circle
                     hat_up = th.rot @ up
-                    if np.dot(hat_up, up) < 0:
-                        # Hat upside down
-                        is_in_win_state = True
+                    # if np.dot(hat_up, up) < 0:
+                    # Hat upside down
+                    is_in_win_state = True
 
             force_loc = p - th.pos
             # force_loc[::2] *= levelness
