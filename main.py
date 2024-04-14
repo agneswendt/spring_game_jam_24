@@ -1,25 +1,30 @@
-from ursina import *
-import physics
-from scipy.spatial.transform import Rotation as R
-from ursina.models.procedural.cylinder import Cylinder, Cone, Circle
+import matplotlib.pyplot as plt
 import numpy as np
+from scipy.spatial.transform import Rotation as R
+from ursina import *
+from ursina.models.procedural.cylinder import Circle, Cone, Cylinder
+
+import physics
 from hand_tracker import HandTracker
 from tophat import TopHat
-import matplotlib.pyplot as plt
 
 # create a window
 app = Ursina()
 ed = EditorCamera()
 TOT_X, TOT_Y = 10, 8
 
-physics.th = TopHat(top_radius=2.2, bottom_radius=2.2, hat_height=1.0)
+physics.th = TopHat(top_radius=1.4, bottom_radius=2, hat_height=2.6)
 
 physics.th.rot = R.from_euler("x", 0, degrees=True).as_matrix()
 # physics.th.lin_mom = np.array([0.0, 0.0, -10.0])
 
 # player = Entity(model=Cylinder(radius=1.2, start=-0.5), color=color.orange, scale_y=2)
 
-player = Entity(position=(physics.th.pos[0], physics.th.pos[1], physics.th.pos[2]))
+player = Entity(
+    model="tophat",
+    texture="hat1_baseColor",
+    position=(physics.th.pos[0], physics.th.pos[1], physics.th.pos[2]),
+)
 top_circle = Entity(
     parent=player,
     model=Circle(
