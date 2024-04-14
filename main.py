@@ -2,6 +2,7 @@ from random import randint
 
 import matplotlib.pyplot as plt
 import numpy as np
+from panda3d.core import LQuaternionf
 from scipy.spatial.transform import Rotation as R
 from ursina import (
     DirectionalLight,
@@ -42,9 +43,9 @@ for circle in physics.th.circles:
     if r > maxr:
         maxr = r
 
-physics.th.pos[1] = -miny
+# physics.th.pos[1] = -miny
 
-physics.th.rot = R.from_euler("x", 0, degrees=True).as_matrix()
+physics.th.rot = R.from_euler("x", 179, degrees=True).as_matrix()
 # physics.th.lin_mom = np.array([0.0, 0.0, -10.0])
 
 # player = Entity(model=Cylinder(radius=1.2, start=-0.5), color=color.orange, scale_y=2)
@@ -166,14 +167,11 @@ def update():
         wand.enabled = False
         physics.update(1 / 60)
         player.position = physics.th.pos
-        rot = R.from_matrix(physics.th.rot).as_euler("xyz", degrees=True)
-        xf = player.rotation[0]
-        xn = rot[0]
+        rot = R.from_matrix(physics.th.rot).as_quat()
 
-        diff = np.round(((xn - xf) / 180)) * 180
-        rot[0] = xn + diff
+        lq = LQuaternionf(rot[0], rot[1], rot[2], rot[3])
+        player.quaternion_setter(lq)
 
-        player.rotation = rot
         xr.append(rot[0])
         yr.append(rot[1])
         zr.append(rot[2])
@@ -182,7 +180,6 @@ def update():
             print("You win!")
             physics.is_in_win_state = False
             win_text.enabled = True
-            win = True
     else:
         speed = tracker.process_frame()
         x, y, r_x = tracker.get_wand_pos()
