@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-from ursina import DirectionalLight, EditorCamera, Entity, Sky, Ursina, Vec3, color
+from ursina import DirectionalLight, EditorCamera, Entity, Sky, Ursina, Vec3, color, audio
 from ursina.models.procedural.cylinder import Circle, Cone, Cylinder
 from ursina.shaders import lit_with_shadows_shader
+from random import randint
 
 import physics
 from hand_tracker import HandTracker
@@ -15,7 +16,6 @@ app = Ursina()
 ed = EditorCamera()
 ed.y = 10
 ed.z = -50
-
 TOT_X, TOT_Y = 10, 8
 
 physics.th = TopHat(top_radius=1.4, bottom_radius=2, hat_height=2.6)
@@ -106,6 +106,22 @@ yr = []
 zr = []
 ed.look_at(-ed.position + player.position)
 
+def play_audio(speed):
+    ranges = {
+        (0, 200): "slow.mp3",
+        (200, 600): "mediumslow.mp3",
+        (600, 1000): "medium.mp3",
+        (1000, 1600): "mediumfast.mp3",
+        (1600, 2500): "fast.mp3",
+        (2500, 1000000): "oh-my-god-meme.mp3"
+    }
+    for r in ranges:
+        if r[0] <= speed <= r[1]:
+            a = audio.Audio(ranges[r], autoplay=True, loop=False)
+            a.play()
+            return
+    
+
 
 def update():
     global flicked
@@ -132,6 +148,7 @@ def update():
         wand.position = (x, y, z)
         if speed:
             flicked = True
+            play_audio(speed)
             strength = speed * 1 / 60
             h = r_x * 2 - 1
             physics.give_impulse(strength, h, 1 / 60)
