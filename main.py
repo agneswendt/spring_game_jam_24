@@ -99,7 +99,7 @@ def update():
 
 
 def input(key):
-    global flicked, xr, yr, zr
+    global flicked, xr, yr, zr, USE_MOUSE
     if key == "space":
         physics.th.reset()
         flicked = False
@@ -108,6 +108,13 @@ def input(key):
         xr = []
         yr = []
         zr = []
+    if key == "m":
+        USE_MOUSE = not USE_MOUSE
+        global tracker
+        if USE_MOUSE:
+            tracker = MouseTracker(app)
+        else:
+            tracker = HandTracker(show_video=False)
     if key == "escape":
         plt.plot(xr, label="x")
         plt.plot(yr, label="y")
